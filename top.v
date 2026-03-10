@@ -1,0 +1,90 @@
+module top (
+ input [15:0] sw,
+ input btnL,
+ input btnU,
+ input btnD,
+ input btnR,
+ input btnC,
+ output [15:0] led
+);
+
+wire  [1:0] mux_sel;
+wire [1:0] demux_sel;
+wire [3:0] mux_out;
+
+assign mux_sel = {btnU, btnL};
+assign demux_sel = {btnR, btnD};
+
+
+mux4_1_4bit mux(
+.A(sw[3:0]),
+.B(sw[7:4]),
+.C(sw[11:8]),
+.D(sw[15:12]),
+.Sel(mux_sel),
+.Enable(btnC),
+.Y(mux_out)
+);
+
+
+demux1_4_4bit demux(
+.In(mux_out),
+.Sel(demux_sel),
+.Enable(btnC),
+.Y0(led[3:0]),
+.Y1(led[7:4]),
+.Y2(led[11:8]),
+.Y3(led[15:12])
+);
+
+endmodule
+
+// Generic 4x1 multiplexer using ternary chaining and boolean expression
+module mux4_1_4bit( 
+ input [3:0] A,
+ input [3:0] B,
+ input [3:0] C,
+ input [3:0] D,
+ input [1:0] Sel,
+ input Enable,
+ output [3:0] Y
+);
+
+assign Y =  Enable? (
+    Sel == 2'b00 ? A:
+    Sel == 2'b01 ? B:
+    Sel == 2'b10 ? C:
+                   D):
+    4'b0000;                    
+
+endmodule
+
+module demux1_4_4bit(
+    input [3:0] In,
+    input [1:0] Sel,
+    input Enable,
+    output [3:0] Y0,
+    output [3:0] Y1,
+    output [3:0] Y2,
+    output [3:0] Y3   
+);
+
+assign Y0 = Enable? (
+    Sel == 2'b00 ? In : 4'b0000) : 4'b0000;
+    
+assign Y1 = Enable? (
+    Sel == 2'b01 ? In : 4'b0000) : 4'b0000;
+    
+assign Y2 = Enable? (
+    Sel == 2'b10 ? In : 4'b0000) : 4'b0000;
+    
+assign Y3 = Enable? (
+    Sel == 2'b11 ? In : 4'b0000) : 4'b0000;
+
+endmodule
+
+
+
+
+
+
